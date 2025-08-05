@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dieng Actual - Tour dan Homestay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        .gold-text {
+            color: #D4AF37;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .gold-border {
+            border-color: #D4AF37;
+        }
+        .gold-bg {
+            background-color: #D4AF37;
+        }
+        .gold-bg:hover {
+            background-color: #C9A227;
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
+        .tour-card {
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .tour-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .modal {
+            transition: all 0.3s ease;
+        }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .admin-edit-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .edit-section:hover .admin-edit-btn {
+            opacity: 1;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="font-sans bg-white text-black">
+    <!-- Navigation -->
+    <nav class="bg-black text-white sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold gold-text">Dieng Actual</h1>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="hover:text-gray-300">Home</a>
+                <a href="#tours" class="hover:text-gray-300">Tours</a>
+                <a href="#homestay" class="hover:text-gray-300">Homestay</a>
+                <a href="#jeep" class="hover:text-gray-300">Jeep</a>
+                <a href="#about" class="hover:text-gray-300">About</a>
+                <a href="#contact" class="hover:text-gray-300">Contact</a>
+            </div>
+            <button id="menu-btn" class="md:hidden text-white">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-black px-4 pb-4">
+            <a href="#home" class="block py-2 hover:text-gray-300">Home</a>
+            <a href="#tours" class="block py-2 hover:text-gray-300">Tours</a>
+            <a href="#homestay" class="block py-2 hover:text-gray-300">Homestay</a>
+            <a href="#jeep" class="block py-2 hover:text-gray-300">Jeep</a>
+            <a href="#about" class="block py-2 hover:text-gray-300">About</a>
+            <a href="#contact" class="block py-2 hover:text-gray-300">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-overlay">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full relative modal">
+            <button id="close-login" class="absolute top-2 right-2 text-gray-500 hover:text-black">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="username" class="block mb-1">Username</label>
+                    <input type="text" id="username" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                </div>
+                <div>
+                    <label for="password" class="block mb-1">Password</label>
+                    <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                </div>
+                <button type="submit" class="w-full py-2 gold-bg text-white rounded hover:bg-[#C9A227] transition">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Controls (hidden by default) -->
+    <div id="admin-controls" class="hidden bg-[#D4AF37] text-white p-4 sticky top-16 z-40 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h3 class="font-bold">Admin Controls</h3>
+            <div class="flex space-x-2">
+                <button id="add-section-btn" class="px-3 py-1 bg-black text-white text-sm rounded hover:bg-gray-800">Add Section</button>
+                <button id="logout-btn" class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative py-16 md:py-24 bg-black text-white edit-section">
+        <button class="admin-edit-btn bg-[#D4AF37] text-white px-2 py-1 rounded text-sm hidden">Edit</button>
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0 animate-fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4 gold-text">Discover the Beauty of Dieng Plateau</h2>
+                    <p class="text-lg mb-6">Experience unforgettable tours and comfortable homestays in the mystical highlands of Central Java.</p>
+                    <div class="flex space-x-4">
+                        <a href="#tours" class="px-6 py-2 gold-bg text-white rounded hover:bg-[#C9A227] transition">Explore Tours</a>
+                        <a href="#homestay" class="px-6 py-2 bg-white text-black rounded hover:bg-gray-200 transition">Book Homestay</a>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/7335c5ec-b4a8-44bd-bc87-a0603342f581.png" alt="Panoramic view of Dieng Plateau with mist-covered mountains and traditional Javanese houses" class="rounded-lg shadow-xl w-full">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section id="video" class="py-16 bg-gray-100 edit-section">
+        <button class="admin-edit-btn bg-[#D4AF37] text-white px-2 py-1 rounded text-sm hidden">Edit</button>
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center">Explore Dieng Through Our Videos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <div class="video-container rounded-lg overflow-hidden shadow-lg">
+                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <h3 class="text-xl font-semibold mt-4">Dieng Plateau Highlights</h3>
+                </div>
+                <div>
+                    <div class="video-container rounded-lg overflow-hidden shadow-lg">
+                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <h3 class="text-xl font-semibold mt-4">Cultural Treasures of Dieng</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tours Section -->
+    <section id="tours" class="py-16 bg-white edit-section">
+        <button class="admin-edit-btn bg-[#D4AF37] text-white px-2 py-1 rounded text-sm hidden">Edit</button>
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-12 text-center">Our Popular Tours</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="tours-container">
+                <!-- Tours will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Homestay Section -->
+    <section id="homestay" class="py-16 bg-gray-100 edit-section">
+        <button class="admin-edit-btn bg-[#D4AF37] text-white px-2 py-1 rounded text-sm hidden">Edit</button>
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-12 text-center">Our Homestay Options</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="homestay-container">
+                <!-- Homestay will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-white edit-section">
+        <button class="admin-edit-btn bg-[#D4AF37] text-white px-2 py-1 rounded text-sm hidden">Edit</button>
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/322d1284-39d9-4b40-9ab9-52b212ae696b.png" alt="Local guide explaining Dieng culture to tourists in traditional Javanese attire" class="rounded-lg shadow-xl w-full">
+                </div>
+                <div class="md:w-1/2 md:pl-12">
+                    <h2 class="text-3xl font-bold mb-6">About Dieng Actual</h2>
+                    <p class="mb-4">Dieng Actual is a premier tour and homestay provider in the Dieng Plateau region. Founded in 2010, we have been helping thousands of visitors experience the natural beauty and cultural richness of this unique highland area.</p>
+                    <p class="mb-4">Our mission is to provide authentic experiences while supporting local communities and preserving the natural environment.</p>
+                    <div class="flex items-center space-x-4 mt-8">
+                        <div class="flex items-center">
+                            <i class="fas fa-users text-2xl gold-text mr-2"></i>
+                            <div>
+                                <p class="text-xl font-bold">5,000+</p>
+                                <p class="text-sm">Happy Visitors</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-home text-2xl gold-text mr-2"></i>
+                            <div>
+                                <p class="text-xl font-bold">20+</p>
+                                <p class="text-sm">Homestays</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-black text-white edit-section">
+        <button class="admin-edit-btn bg-[#D4AF37] text-white px-2 py-1 rounded text-sm hidden">Edit</button>
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-12 text-center gold-text">Contact Us</h2>
+            <div class="flex flex-col md:flex-row">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h3 class="text-2xl font-semibold mb-4">Get In Touch</h3>
+                    <p class="mb-6">Have questions about our tours or homestays? Feel free to contact us through any of these channels.</p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-[#D4AF37] text-xl mr-4 mt-1"></i>
+                            <p>Jl. Dieng Atas, Kejajar, Wonosobo, Central Java, Indonesia</p>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-[#D4AF37] text-xl mr-4"></i>
+                            <p>+62 123 4567 8910</p>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-[#D4AF37] text-xl mr-4"></i>
+                            <p>info@diengactual.com</p>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <h4 class="text-xl font-semibold mb-4">Follow Us</h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 md:pl-12">
+                    <h3 class="text-2xl font-semibold mb-4">Contact Via WhatsApp</h3>
+                    <form id="contact-form" class="space-y-4">
+                        <div>
+                            <textarea placeholder="Type your message here..." rows="5" class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"></textarea>
+                        </div>
+                        <a href="https://wa.me/6212345678910?text=" id="whatsapp-link" class="inline-block px-6 py-2 gold-bg text-white rounded hover:bg-[#C9A227] transition">Send via WhatsApp</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-2xl font-bold gold-text">Dieng Actual</h2>
+                    <p class="text-sm mt-2">Tour & Homestay Partner in Dieng Plateau</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-[#D4AF37]">Terms & Conditions</a>
+                    <a href="#" class="hover:text-[#D4AF37]">Privacy Policy</a>
+                    <a href="#" class="hover:text-[#D4AF37]">FAQ</a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+                <p>© 2023 Dieng Actual. All rights reserved.</p>
+                <button id="login-btn" class="mt-4 px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition" style="outline: rgb(0, 0, 0) dotted 3px; outline-offset: 1px;">Login</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Edit Content Modal (for Admin) -->
+    <div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-overlay">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full relative modal overflow-y-auto max-h-[90vh]">
+            <button id="close-edit" class="absolute top-2 right-2 text-gray-500 hover:text-black">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6">Edit Content</h2>
+            <form id="edit-form" class="space-y-4">
+                <input type="hidden" id="section-id">
+                <input type="hidden" id="content-type">
+                <div id="image-upload-container" class="hidden">
+                    <div class="mb-4">
+                        <label class="block mb-2 font-medium">Image</label>
+                        <img id="preview-image" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c1d3636a-ffd1-4267-bde4-1648acf06d50.png" alt="Image to be uploaded" class="mb-2 rounded-lg max-w-full h-auto">
+                        <input type="file" id="image-upload" accept="image/*" class="block w-full text-sm text-gray-500
+                          file:mr-4 file:py-2 file:px-4
+                          file:rounded file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-gray-100 file:text-gray-700
+                          hover:file:bg-gray-200">
+                    </div>
+                </div>
+                <div id="video-url-container" class="hidden">
+                    <div>
+                        <label for="video-url" class="block mb-1">Video URL</label>
+                        <input type="text" id="video-url" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                    </div>
+                </div>
+                <div>
+                    <label for="content-title" class="block mb-1">Title</label>
+                    <input type="text" id="content-title" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                </div>
+                <div>
+                    <label for="content-description" class="block mb-1">Description</label>
+                    <textarea id="content-description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"></textarea>
+                </div>
+                <div>
+                    <label for="content-price" class="block mb-1">Price (optional)</label>
+                    <input type="text" id="content-price" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                </div>
+                <div class="flex justify-end space-x-4 pt-4">
+                    <button type="button" id="cancel-edit" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 gold-bg text-white rounded hover:bg-[#C9A227] transition">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Section Modal (for Admin) -->
+    <div id="add-section-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-overlay">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full relative modal">
+            <button id="close-add-section" class="absolute top-2 right-2 text-gray-500 hover:text-black">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6">Add New Content</h2>
+            <form id="add-section-form" class="space-y-4">
+                <div>
+                    <label class="block mb-2 font-medium">Content Type</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <input type="radio" name="new-content-type" id="new-tour" value="tour" class="hidden peer" checked>
+                            <label for="new-tour" class="block p-4 border border-gray-300 rounded-lg cursor-pointer peer-checked:border-[#D4AF37] peer-checked:bg-[#D4AF37]/10">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-map-marked-alt text-[#D4AF37] text-2xl mb-2"></i>
+                                    <span>Tour</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" name="new-content-type" id="new-homestay" value="homestay" class="hidden peer">
+                            <label for="new-homestay" class="block p-4 border border-gray-300 rounded-lg cursor-pointer peer-checked:border-[#D4AF37] peer-checked:bg-[#D4AF37]/10">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-home text-[#D4AF37] text-2xl mb-2"></i>
+                                    <span>Homestay</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" name="new-content-type" id="new-jeep" value="jeep" class="hidden peer">
+                            <label for="new-jeep" class="block p-4 border border-gray-300 rounded-lg cursor-pointer peer-checked:border-[#D4AF37] peer-checked:bg-[#D4AF37]/10">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-car text-[#D4AF37] text-2xl mb-2"></i> 
+                                    <span>Jeep</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 pt-4">
+                    <button type="button" id="cancel-add-section" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 gold-bg text-white rounded hover:bg-[#C9A227] transition">Add New</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for tours and homestays (will be replaced with localStorage data)
+        let sampleTours = [
+            {
+                id: 1,
+                title: "Sunrise at Sikunir Hill",
+                description: "Experience breathtaking sunrise views from the famous Sikunir Hill, followed by a traditional Javanese breakfast.",
+                price: "Rp 150.000 / person",
+                image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a43bca93-6a90-417a-b9c2-1e3927b5db68.png"
+            },
+            {
+                id: 2,
+                title: "Dieng Culture Tour",
+                description: "Explore the ancient Hindu temples and learn about Dieng's rich cultural heritage with our expert guides.",
+                price: "Rp 200.000 / person",
+                image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/89e5dc38-a798-4e46-9038-03bdc2a17b24.png"
+            },
+            {
+                id: 3,
+                title: "Cave Exploration Adventure",
+                description: "Discover the mystical caves of Dieng, including Goa Semar and Goa Jaran, with our experienced guides.",
+                price: "Rp 250.000 / person",
+                image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4316ac81-1846-4a46-a2e7-6a0b866dd9e3.png"
+            }
+        ];
+
+        let sampleHomestays = [
+            {
+                id: 1,
+                title: "Dieng Sunrise Homestay",
+                description: "Comfortable homestay with stunning views of the Dieng mountains. Includes breakfast and free tour consultation.",
+                price: "Rp 300.000 / night",
+                image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/296a2604-495c-4c5e-a1c0-6d3067b3b358.png"
+            },
+            {
+                id: 2,
+                title: "Plawangan Boutique Homestay",
+                description: "Modern homestay with traditional Javanese touches. Located close to major attractions with hot water and WiFi.",
+                price: "Rp 500.000 / night",
+                image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/2812d29d-fdb4-48c4-8522-5d91d11d893e.png"
+            },
+            {
+                id: 3,
+                title: "Seroja Family Homestay",
+                description: "Spacious family-friendly homestay with kitchenette and living area. Perfect for groups or families.",
+                price: "Rp 750.000 / night",
+                image: "https://placehold.co/600x400"
+            }
+        ];
+
+        // Initialize data from localStorage or create sample data
+        let tours = JSON.parse(localStorage.getItem('diengActualTours')) || sampleTours;
+        let homestays = JSON.parse(localStorage.getItem('diengActualHomestays')) || sampleHomestays;
+        let isAdmin = false;
+
+        // DOM Elements
+        const loginBtn = document.getElementById('login-btn');
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const loginModal = document.getElementById('login-modal');
+        const closeLogin = document.getElementById('close-login');
+        const loginForm = document.getElementById('login-form');
+        const adminControls = document.getElementById('admin-controls');
+        const logoutBtn = document.getElementById('logout-btn');
+        const addSectionBtn = document.getElementById('add-section-btn');
+        const toursContainer = document.getElementById('tours-container');
+        const homestayContainer = document.getElementById('homestay-container');
+        const editModal = document.getElementById('edit-modal');
+        const closeEdit = document.getElementById('close-edit');
+        const cancelEdit = document.getElementById('cancel-edit');
+        const editForm = document.getElementById('edit-form');
+        const addSectionModal = document.getElementById('add-section-modal');
+        const closeAddSection = document.getElementById('close-add-section');
+        const cancelAddSection = document.getElementById('cancel-add-section');
+        const addSectionForm = document.getElementById('add-section-form');
+        const editSections = document.querySelectorAll('.edit-section');
+
+        // Event Listeners
+        loginBtn.addEventListener('click', toggleLoginModal);
+        menuBtn.addEventListener('click', toggleMobileMenu);
+        closeLogin.addEventListener('click', toggleLoginModal);
+        loginForm.addEventListener('submit', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+        addSectionBtn.addEventListener('click', toggleAddSectionModal);
+        closeAddSection.addEventListener('click', toggleAddSectionModal);
+        cancelAddSection.addEventListener('click', toggleAddSectionModal);
+        addSectionForm.addEventListener('submit', handleAddSection);
+        closeEdit.addEventListener('click', toggleEditModal);
+        cancelEdit.addEventListener('click', toggleEditModal);
+        editForm.addEventListener('submit', handleEditSubmit);
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTours();
+            renderHomestays();
+            checkAdminStatus();
+        });
+
+        // Functions
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        function toggleLoginModal() {
+            loginModal.classList.toggle('hidden');
+        }
+
+        function toggleEditModal() {
+            editModal.classList.toggle('hidden');
+        }
+
+        function toggleAddSectionModal() {
+            addSectionModal.classList.toggle('hidden');
+        }
+
+        function toggleEditButtons(show) {
+            document.querySelectorAll('.admin-edit-btn').forEach(btn => {
+                btn.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        function checkAdminStatus() {
+            isAdmin = localStorage.getItem('diengActualAdmin') === 'true';
+            if (isAdmin) {
+                adminControls.classList.remove('hidden');
+                toggleEditButtons(true);
+            } else {
+                adminControls.classList.add('hidden');
+                toggleEditButtons(false);
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'heha' && password === '123456') {
+                localStorage.setItem('diengActualAdmin', 'true');
+                alert('Login successful! You now have admin access.');
+                toggleLoginModal();
+                checkAdminStatus();
+            } else {
+                alert('Invalid credentials. Please try again.');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('diengActualAdmin');
+            isAdmin = false;
+            adminControls.classList.add('hidden');
+            toggleEditButtons(false);
+            alert('You have been logged out.');
+        }
+
+        function renderTours() {
+            toursContainer.innerHTML = '';
+            tours.forEach(tour => {
+                const tourCard = document.createElement('div');
+                tourCard.className = 'tour-card bg-white rounded-lg overflow-hidden shadow-lg relative';
+                tourCard.innerHTML = `
+                    <div class="relative">
+                        <img src="${tour.image}" alt="${tour.title}" class="w-full h-48 object-cover">
+                        ${isAdmin ? `<button class="admin-edit-btn absolute top-2 right-2 bg-[#D4AF37] text-white px-2 py-1 rounded text-sm" onclick="openEditModal('tour', ${tour.id})">Edit</button>` : ''}
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">${tour.title}</h3>
+                        <p class="text-gray-700 mb-4">${tour.description}</p>
+                        <p class="font-bold gold-text">${tour.price}</p>
+                        <a href="#contact" class="mt-4 inline-block px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition">Book Now</a>
+                    </div>
+                `;
+                toursContainer.appendChild(tourCard);
+            });
+        }
+
+        function renderHomestays() {
+            homestayContainer.innerHTML = '';
+            homestays.forEach(homestay => {
+                const homestayCard = document.createElement('div');
+                homestayCard.className = 'tour-card bg-white rounded-lg overflow-hidden shadow-lg relative';
+                homestayCard.innerHTML = `
+                    <div class="relative">
+                        <img src="${homestay.image}" alt="${homestay.title}" class="w-full h-48 object-cover">
+                        ${isAdmin ? `<button class="admin-edit-btn absolute top-2 right-2 bg-[#D4AF37] text-white px-2 py-1 rounded text-sm" onclick="openEditModal('homestay', ${homestay.id})">Edit</button>` : ''}
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">${homestay.title}</h3>
+                        <p class="text-gray-700 mb-4">${homestay.description}</p>
+                        <p class="font-bold gold-text">${homestay.price}</p>
+                        <a href="#contact" class="mt-4 inline-block px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition">Book Now</a>
+                    </div>
+                `;
+                homestayContainer.appendChild(homestayCard);
+            });
+        }
+
+        function openEditModal(type, id) {
+            // Reset form
+            document.getElementById('image-upload-container').classList.add('hidden');
+            document.getElementById('video-url-container').classList.add('hidden');
+            
+            // Set content type and ID
+            document.getElementById('content-type').value = type;
+            document.getElementById('section-id').value = id;
+            
+            // Find the item
+            let item;
+            if (type === 'tour') {
+                item = tours.find(t => t.id === id);
+            } else {
+                item = homestays.find(h => h.id === id);
+            }
+            
+            if (item) {
+                document.getElementById('content-title').value = item.title;
+                document.getElementById('content-description').value = item.description;
+                document.getElementById('content-price').value = item.price.replace(/Rp\s|\/.*/g, '');
+                
+                if (item.image) {
+                    document.getElementById('preview-image').src = item.image;
+                    document.getElementById('image-upload-container').classList.remove('hidden');
+                }
+                
+                if (item.videoUrl) {
+                    document.getElementById('video-url').value = item.videoUrl;
+                    document.getElementById('video-url-container').classList.remove('hidden');
+                }
+            }
+            
+            toggleEditModal();
+        }
+
+        function handleEditSubmit(e) {
+            e.preventDefault();
+            const type = document.getElementById('content-type').value;
+            const id = parseInt(document.getElementById('section-id').value);
+            const title = document.getElementById('content-title').value;
+            const description = document.getElementById('content-description').value;
+            const price = document.getElementById('content-price').value;
+            const priceText = price ? `Rp ${price}${type === 'tour' ? ' / person' : ' / night'}` : '';
+            
+            let items = type === 'tour' ? tours : homestays;
+            const index = items.findIndex(item => item.id === id);
+            
+            if (index !== -1) {
+                items[index] = {
+                    ...items[index],
+                    title,
+                    description,
+                    price: priceText
+                };
+                
+                // Handle image upload (placeholder for real implementation)
+                const imageFile = document.getElementById('image-upload').files[0];
+                if (imageFile) {
+                    // In a real app, you would upload to a server
+                    // Here we'll just simulate it with a placeholder
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        items[index].image = e.target.result;
+                        saveData();
+                    };
+                    reader.readAsDataURL(imageFile);
+                }
+                
+                // Handle video URL
+                const videoUrl = document.getElementById('video-url').value;
+                if (videoUrl) {
+                    items[index].videoUrl = videoUrl;
+                }
+                
+                saveData();
+            }
+            
+            toggleEditModal();
+            alert('Changes saved successfully!');
+        }
+
+        function handleAddSection(e) {
+            e.preventDefault();
+            const type = document.querySelector('input[name="new-content-type"]:checked').value;
+            
+            // Generate new ID
+            let newId = 1;
+            const items = type === 'tour' ? tours : homestays;
+            if (items.length > 0) {
+                newId = Math.max(...items.map(i => i.id)) + 1;
+            }
+            
+            const newItem = {
+                id: newId,
+                title: "New " + type.charAt(0).toUpperCase() + type.slice(1),
+                description: "Description for the new " + type,
+                price: type === 'tour' ? "Rp 0 / person" : "Rp 0 / night",
+                image: "https://placehold.co/600x400"
+            };
+            
+            if (type === 'tour') {
+                tours.push(newItem);
+            } else {
+                homestays.push(newItem);
+            }
+            
+            saveData();
+            toggleAddSectionModal();
+            alert('New ' + type + ' added! You can now edit it.');
+        }
+
+        function saveData() {
+            localStorage.setItem('diengActualTours', JSON.stringify(tours));
+            localStorage.setItem('diengActualHomestays', JSON.stringify(homestays));
+            renderTours();
+            renderHomestays();
+        }
+
+        // WhatsApp message handler
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const message = document.querySelector('#contact-form textarea').value;
+            const encodedMessage = encodeURIComponent(message);
+            document.getElementById('whatsapp-link').href = `https://wa.me/6212345678910?text=${encodedMessage}`;
+            document.getElementById('whatsapp-link').click();
+        });
+
+        // Make functions globally available
+        window.openEditModal = openEditModal;
+    </script>
+</body>
+</html>
